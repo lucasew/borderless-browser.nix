@@ -1,8 +1,9 @@
-{
-  chromium
+{ chromium
   , zenity
   , writeShellScript
   , writeShellScriptBin
+  , queryText ? "Link a ser aberto"
+  , noURLSpecifiedText ? "Nenhuma URL especificada"
 }:
 let
   zenityBin = "${zenity}/bin/zenity";
@@ -10,14 +11,14 @@ let
 in writeShellScript "webapp"''
   if [ -z "$@" ]
   then
-    URL=$(${zenityBin} --entry --text="Link a ser aberto")
+    URL=$(${zenityBin} --entry --text="${queryText}")
   else
     URL="$@"
   fi
   echo $URL
   if [ -z "$URL" ]
   then
-    ${zenityBin} --error --text="Nenhuma URL especificada"
+    ${zenityBin} --error --text="${noURLSpecifiedText}"
     exit 1
   fi
   if [[ "$URL" =~ ^~ ]]

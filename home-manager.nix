@@ -31,13 +31,13 @@ with lib;
   };
   config = let
     defs = config.borderless-browser.apps;
-    convert = k: v: pkgs.webapp.wrap {
+    convert = k: v: pkgs.borderlessBrowser.wrap {
       name = k;
       inherit (v) desktopName url icon;
     };
     attrNormalized = builtins.mapAttrs (convert) defs;
     packages = builtins.attrValues attrNormalized;
   in {
-    home.packages = packages;
+    home.packages = packages ++ [ pkgs.borderlessBrowser ];
   };
 }

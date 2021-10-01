@@ -26,6 +26,7 @@
     };
     lib.wrap = {
       name
+    , wrapper ? "${script}"
     , desktopName ? name
     , url
     , icon ? "applications-internet"
@@ -38,9 +39,13 @@
     };
     homeModules.borderless-browser = import ./home-manager.nix;
     overlay = final: pref: {
-      borderlessBrowser = pkgs.symlinkJoin {
-        paths = [ bin app ];
-      };
+      borderlessBrowser = 
+      let
+        entrypoint = pkgs.symlinkJoin {
+          name = "borderless-browser";
+          paths = [ bin app ];
+        };
+      in entrypoint // { wrap = lib.wrap; };
     };
   };
 }
