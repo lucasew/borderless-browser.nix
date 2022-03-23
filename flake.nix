@@ -38,7 +38,7 @@
       exec = ''${script} "${url}"'';
     };
     homeModules.borderless-browser = import ./home-manager.nix;
-    overlay = final: pref: {
+    overlay = final: prev: {
       borderlessBrowser = 
       let
         entrypoint = pkgs.symlinkJoin {
