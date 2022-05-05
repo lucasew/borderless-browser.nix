@@ -37,8 +37,8 @@
       icon = icon;
       exec = ''${script} "${url}"'';
     };
-    homeModules.borderless-browser = import ./home-manager.nix;
-    overlay = final: prev: {
+    homeModules.default = import ./home-manager.nix;
+    overlays.default = final: prev: {
       borderlessBrowser = 
       let
         entrypoint = pkgs.symlinkJoin {
