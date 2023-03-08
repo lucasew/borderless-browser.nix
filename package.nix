@@ -60,13 +60,19 @@ let
 
     dontUnpack = true;
 
+    preferLocalBuild = true;
+
     nativeBuildInputs = [ copyDesktopItems ];
 
     desktopItems = [ desktop ];
 
     installPhase = ''
+      runHook preInstall
+
       mkdir $out/bin -p
       install ${script} $out/bin/webapp${nameIfUrl "-${name}"}
+
+      runHook postInstall
     '';
 
     inherit passthru;
