@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+set -eu
+
+function die {
+    supress_generic_error=1
+    if [ -v bin_ZENITY ] && [ ! -z "$bin_ZENITY" ]; then
+        "$bin_ZENITY" --error --text="$*"
+    else
+        echo "error: $*" 2>&2
+    fi
+}
+
+function absolute_binary {
+    bin="$(command -v "$@" 2>&-)"
+    if [ -z "$bin" ]; then
+        die "No such commands: $@"
+    fi
+    echo $bin | head -n 1
+}
+
+function cleanup {
+    if [ $? != 0 ] && [ ! -v supress_generic_error ]; then
+        die "Errors happened during runtime. See this script logs for details."
+    fi
+}
+
+trap cleanup EXIT
+
+CHROME_BINARIES=(chromium)
+
+if [ ! -v bin_ZENITY ]; then
+    bin_ZENITY="$(absolute_binary zenity)"
+fi
+
+if [ ! -v bin_CHROMIUM ]; then
+    bin_CHROMIUM="$(absolute_binary chromium)"
+fi
+
+if [ ! -v text_QUERY ]; then
+    text_QUERY="Link to be opened"
+fi
+
+if [ ! -v text_NOURL ]; then
+    text_NOURL="No URL specified"
+fi
+
+if [ $# -eq 0 ]; then
+    URL="$("$bin_ZENITY" --entry --text="$text_QUERY" || true)"
+else
+    URL="$@"
+fi
+
+if [ -z "$URL" ]; then
+    die $text_NOURL
+fi
+
+if [[ "$URL" =~ ^~ ]]; then
+    URL=$(echo $URL | sed -E s:^~\/?::)
+    URL="file://$HOME/$URL"
+fi
+
+if [[ "$URL" =~ ^\/ ]]; then
+    URL="file://$URL"
+fi
+
+if [[ ! "$URL" =~ ^(file|https?)?:\/\/ ]]; then
+    URL="https://$URL"
+fi
+
+echo final url: $URL
+
+chromeFlags=()
+
+chromeFlags+=(--app="$URL")
+
+if [ -v CHROME_PROFILE ] && [[ "$CHROME_PROFILE" =~ ^[a-zA-Z_0-9]*$ ]]; then
+    echo profile
+    profileDir="~/.config/borderless-browser-profiles/$CHROME_PROFILE"
+    chromeFlags+=(--user-data-dir="$profileDir")
+fi
+
+echo "${chromeFlags[@]}"
+"$bin_CHROMIUM" "${chromeFlags[@]}"
+

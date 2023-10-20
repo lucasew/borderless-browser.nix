@@ -3,15 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = {self, nixpkgs}:
-  let
-    pkgs = import nixpkgs {
-      system = "x86_64-linux"; # should work in any tuple that has chromium working
-    };
-  in {
+  outputs = {self, flake-utils, nixpkgs}:
+  flake-utils.lib.eachDefaultSystem (system: {
+
     homeModules.default = import ./home-manager.nix;
     overlays.default = import ./overlay.nix;
-    packages.default = pkgs.callPackage ./package.nix {};
-  };
+    packages.default = nixpkgs.legacyPackages.${system}.callPackage ./package.nix {};
+
+  });
 }
