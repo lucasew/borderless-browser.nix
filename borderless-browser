@@ -74,9 +74,12 @@ chromeFlags=()
 
 chromeFlags+=(--app="$URL")
 
+if [ ! -v profileToplevel ]; then
+    profileToplevel=~/.config/borderless-browser-profiles
+fi
+
 if [ -v CHROME_PROFILE ] && [[ "$CHROME_PROFILE" =~ ^[a-zA-Z_0-9]*$ ]]; then
-    echo profile
-    profileDir="~/.config/borderless-browser-profiles/$CHROME_PROFILE"
+    profileDir=$profileToplevel/$CHROME_PROFILE
     chromeFlags+=(--user-data-dir="$profileDir")
 fi
 
