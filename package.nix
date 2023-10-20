@@ -21,31 +21,32 @@ let
   }:
 
   let
-    self = stdenvNoCC.mkDerivation (attrs: {
+
+    makeWrapperArgs = [
+      "--set-default" "text_QUERY" queryText
+      "--set-default" "text_NOURL" noURLSpecifiedText
+      "--set" "bin_CHROMIUM" browser
+      "--set" "bin_ZENITY" (lib.getExe zenity)
+    ]
+      ++ (lib.optionals (profile != null) [ "--set" "CHROME_PROFILE" profile ])
+      ++ (lib.optionals (url != null) [ "--add-flags" url ])
+    ;
+
+  in
+    stdenvNoCC.mkDerivation (attrs: {
       name = "webapp-${name}";
 
       dontUnpack = true;
 
-      makeWrapperArgs = lib.escapeShellArgs ([
-        "--set-default" "text_QUERY" queryText
-        "--set-default" "text_NOURL" noURLSpecifiedText
-        "--set" "bin_CHROMIUM" browser
-        "--set" "bin_ZENITY" (lib.getExe zenity)
-      ]
-        ++ (lib.optionals (profile != null) [ "--set" "CHROME_PROFILE" profile ])
-        ++ (lib.optionals (url != null) [ "--add-flags" url ])
-      );
-
       nativeBuildInputs = [ copyDesktopItems makeWrapper ];
 
-      script = ./borderless-browser;
 
       installPhase = ''
         runHook preInstall
 
         mkdir -p $out/bin
 
-        makeWrapper ${attrs.script} $out/bin/$name ${attrs.makeWrapperArgs}
+        makeWrapper ${./borderless-browser} $out/bin/$name ${lib.escapeShellArgs makeWrapperArgs}
 
         runHook postInstall
       '';
@@ -63,9 +64,8 @@ let
         })
       ];
 
-      inherit passthru;
+      passthru = passthru // { inherit makeWrapperArgs; };
     });
-  in self;
 
 in mkWebapp {
   passthru = {

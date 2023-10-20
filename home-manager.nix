@@ -3,7 +3,7 @@ with lib;
 {
   options.borderless-browser = {
     chromium = mkOption {
-      type = types.str;
+      type = types.package;
       description = "Which chromium-like browser use";
       default = pkgs.chromium;
     };
@@ -12,7 +12,7 @@ with lib;
       default = {};
       type = with types; attrsOf (submodule {
         options = {
-          profile = {
+          profile = mkOption {
             description = "Use a different profile to allow using different accounts. null means use the default profile.";
             type = types.nullOr types.str;
             default = null;
