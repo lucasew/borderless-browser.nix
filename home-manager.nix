@@ -12,6 +12,11 @@ with lib;
       default = {};
       type = with types; attrsOf (submodule {
         options = {
+          profile = {
+            description = "Use a different profile to allow using different accounts. null means use the default profile.";
+            type = types.nullOr types.str;
+            default = null;
+          };
           desktopName = mkOption {
             description = "The name that will be shown to the user";
             type = types.str;
@@ -33,7 +38,7 @@ with lib;
     defs = config.borderless-browser.apps;
     convert = k: v: pkgs.borderlessBrowser.wrap {
       name = k;
-      inherit (v) desktopName url icon;
+      inherit (v) desktopName url icon profile;
     };
     attrNormalized = builtins.mapAttrs (convert) defs;
     packages = builtins.attrValues attrNormalized;
