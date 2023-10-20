@@ -20,46 +20,52 @@ let
   , passthru ? {}
   }:
 
-  stdenvNoCC.mkDerivation (attrs: {
-    name = "webapp-${name}";
+  let
+    self = stdenvNoCC.mkDerivation (attrs: {
+      name = "webapp-${name}";
 
-    dontUnpack = true;
+      dontUnpack = true;
 
-    makeWrapperArgs = lib.escapeShellArgs ([
-      "--set-default" "text_QUERY" queryText
-      "--set-default" "text_NOURL" noURLSpecifiedText
-      "--set" "bin_CHROMIUM" browser
-      "--set" "bin_ZENITY" (lib.getExe zenity)
-    ]
-      ++ (lib.optionals (profile != null) [ "--set" "CHROME_PROFILE" profile ])
-      ++ (lib.optionals (url != null) [ "--add-flags" url ])
-    );
+      makeWrapperArgs = lib.escapeShellArgs ([
+        "--set-default" "text_QUERY" queryText
+        "--set-default" "text_NOURL" noURLSpecifiedText
+        "--set" "bin_CHROMIUM" browser
+        "--set" "bin_ZENITY" (lib.getExe zenity)
+      ]
+        ++ (lib.optionals (profile != null) [ "--set" "CHROME_PROFILE" profile ])
+        ++ (lib.optionals (url != null) [ "--add-flags" url ])
+      );
 
-    nativeBuildInputs = [ copyDesktopItems makeWrapper ];
+      nativeBuildInputs = [ copyDesktopItems makeWrapper ];
 
-    script = ./borderless-browser;
+      script = ./borderless-browser;
 
-    installPhase = ''
-      runHook preInstall
+      installPhase = ''
+        runHook preInstall
 
-      mkdir -p $out/bin
+        mkdir -p $out/bin
 
-      makeWrapper ${attrs.script} $out/bin/$name ${attrs.makeWrapperArgs}
+        makeWrapper ${attrs.script} $out/bin/$name ${attrs.makeWrapperArgs}
 
-      runHook postInstall
-    '';
+        runHook postInstall
+      '';
 
-    desktopItems = [
-      (makeDesktopItem {
-        inherit (attrs) name;
-        inherit desktopName icon;
-        type = "Application";
-        exec = "${placeholder "out"}/bin/${attrs.name}";
-      })
-    ];
+      postFixup = ''
+        substituteInPlace $out/share/applications/$name.desktop --replace @bin@ $out/bin/$name
+      '';
 
-    inherit passthru;
-  });
+      desktopItems = [
+        (makeDesktopItem {
+          inherit (attrs) name;
+          inherit desktopName icon;
+          type = "Application";
+          exec = "@bin@";
+        })
+      ];
+
+      inherit passthru;
+    });
+  in self;
 
 in mkWebapp {
   passthru = {
