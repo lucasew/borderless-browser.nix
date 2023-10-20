@@ -72,7 +72,11 @@ echo final url: $URL
 
 chromeFlags=()
 
-chromeFlags+=(--app="$URL")
+if [ ! -v CHROME_DONT_BORDERLESS ]; then
+    chromeFlags+=(--app="$URL")
+else
+    chromeFlags+=("$URL")
+fi
 
 if [ ! -v profileToplevel ]; then
     profileToplevel=~/.config/borderless-browser-profiles
