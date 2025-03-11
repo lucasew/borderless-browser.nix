@@ -1,8 +1,7 @@
 { lib
 , stdenvNoCC
 , chromium
-, gnome3
-, zenity ? gnome3.zenity
+, zenity
 , makeDesktopItem
 , copyDesktopItems
 , makeWrapper
