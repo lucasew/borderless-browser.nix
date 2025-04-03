@@ -1,34 +1,43 @@
 {lib, pkgs, config, ...}:
-with lib;
 {
   options.borderless-browser = {
-    chromium = mkOption {
-      type = types.package;
-      description = "Which chromium-like browser use";
+    chromium = lib.mkOption {
+      type = lib.types.package;
+      description = "Which chromium-like browser to use";
       default = pkgs.chromium;
+      example = lib.literalExpression "pkgs.google-chrome";
     };
-    apps = mkOption {
-      description = "All webapps";
+    apps = lib.mkOption {
+      description = "All webapps to create as borderless applications";
       default = {};
-      type = with types; attrsOf (submodule {
+      type = lib.types.attrsOf (lib.types.submodule {
         options = {
-          profile = mkOption {
+          profile = lib.mkOption {
             description = "Use a different profile to allow using different accounts. null means use the default profile.";
-            type = types.nullOr types.str;
+            type = lib.types.nullOr lib.types.str;
             default = null;
+            example = "work";
           };
-          desktopName = mkOption {
+          desktopName = lib.mkOption {
             description = "The name that will be shown to the user";
-            type = types.str;
+            type = lib.types.str;
           };
-          url = mkOption {
+          url = lib.mkOption {
             description = "The URL that the borderless webapp will open";
-            type = types.str;
+            type = lib.types.str;
+            example = "https://calendar.google.com";
           };
-          icon = mkOption {
+          icon = lib.mkOption {
             description = "The icon that will be attributed to the shortcut";
-            type = types.str;
+            type = lib.types.str;
             default = "applications-internet";
+            example = "calendar";
+          };
+          extraFlags = lib.mkOption {
+            description = "Additional command-line flags to pass to the browser";
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["--disable-gpu" "--force-device-scale-factor=1.5"];
           };
         };
       });
@@ -39,9 +48,11 @@ with lib;
     convert = k: v: pkgs.borderlessBrowser.wrap {
       name = k;
       inherit (v) desktopName url icon profile;
+      extraFlags = if (builtins.hasAttr "extraFlags" v) then v.extraFlags else [];
+      browser = config.borderless-browser.chromium;
     };
-    attrNormalized = builtins.mapAttrs (convert) defs;
-    packages = builtins.attrValues attrNormalized;
+    attrNormalized = lib.mapAttrs convert defs;
+    packages = lib.attrValues attrNormalized;
   in {
     home.packages = packages ++ [ pkgs.borderlessBrowser ];
   };
