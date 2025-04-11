@@ -17,7 +17,19 @@ let
   , noURLSpecifiedText ? "No URL specified"
   , profile ? null
   , passthru ? {}
+  , extraFlags ? []
   }:
+
+  let
+    wrapperArgs = []
+    ++ ["--set-default" "text_QUERY" queryText]
+    ++ ["--set-default" "text_NOURL" noURLSpecifiedText]
+    ++ ["--set" "bin_CHROMIUM" browser]
+    ++ ["--set" "bin_ZENITY" (lib.getExe zenity)]
+    ++ lib.optionals (profile != null) ["--set" "CHROME_PROFILE" profile]
+    ++ lib.optionals (url != null) ["--add-flags" url]
+    ++ lib.flatten (lib.map (flag: ["--add-flags" flag]) extraFlags);
+  in
 
   stdenvNoCC.mkDerivation (attrs: {
     name = "webapp-${name}";
@@ -27,13 +39,7 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out/bin
-      makeWrapper ${./borderless-browser} $out/bin/$name \
-        --set-default text_QUERY "${queryText}" \
-        --set-default text_NOURL "${noURLSpecifiedText}" \
-        --set bin_CHROMIUM "${browser}" \
-        --set bin_ZENITY "${lib.getExe zenity}" \
-        ${lib.optionalString (profile != null) "--set CHROME_PROFILE ${profile}"} \
-        ${lib.optionalString (url != null) "--add-flags ${url}"}
+      makeWrapper ${./borderless-browser} $out/bin/$name ${lib.escapeShellArgs wrapperArgs}
       runHook postInstall
     '';
 
