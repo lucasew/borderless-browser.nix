@@ -2,10 +2,10 @@
 {
   options.borderless-browser = {
     chromium = lib.mkOption {
-      type = lib.types.package;
+      type = lib.types.path;
       description = "Which chromium-like browser to use";
       default = lib.getExe pkgs.chromium;
-      example = lib.literalExpression "pkgs.google-chrome";
+      example = lib.literalExpression "lib.getExe pkgs.google-chrome";
     };
     apps = lib.mkOption {
       description = "All webapps to create as borderless applications";
