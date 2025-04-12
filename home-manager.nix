@@ -4,7 +4,7 @@
     chromium = lib.mkOption {
       type = lib.types.package;
       description = "Which chromium-like browser to use";
-      default = pkgs.chromium;
+      default = lib.getExe pkgs.chromium;
       example = lib.literalExpression "pkgs.google-chrome";
     };
     apps = lib.mkOption {
