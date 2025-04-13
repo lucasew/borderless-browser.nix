@@ -1,6 +1,6 @@
 { lib
 , stdenvNoCC
-, chromium
+, brave
 , zenity
 , makeDesktopItem
 , copyDesktopItems
@@ -10,7 +10,7 @@ let
   mkWebapp = {
     name ? "webapp"
   , desktopName ? "Web Application"
-  , browser ? lib.getExe chromium
+  , browser ? lib.getExe brave
   , icon ? "applications-internet"
   , url ? null
   , queryText ? "Link to be opened"
