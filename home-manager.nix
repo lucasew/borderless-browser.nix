@@ -3,7 +3,7 @@
   options.borderless-browser = {
     chromium = lib.mkOption {
       type = lib.types.path;
-      description = "Which chromium-like browser to use";
+      description = "Which chromium-like browser to use. Default is chromium. Use another one if you care about ad blocking.";
       default = lib.getExe pkgs.chromium;
       example = lib.literalExpression "lib.getExe pkgs.google-chrome";
     };
