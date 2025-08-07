@@ -62,6 +62,10 @@ echo "final url: $URL"
 # Prepare Chrome flags
 chromeFlags=()
 
+if [[ -v WAYLAND_DISPLAY ]]; then
+    chromeFlags+=(--enable-features=UseOzonePlatform --ozone-platform=wayland)
+fi
+
 if [[ ! -v CHROME_DONT_BORDERLESS ]]; then
     chromeFlags+=(--app="$URL")
 else
